@@ -27,13 +27,15 @@ const MostActiveUserInPost = () => {
   const [isLoading, setIsLoading] = useState(false);
 
 
+
   // Function to fetch data from the backend API
   useEffect(() => {
     const fetchPosts = async () => {
       setIsLoading(true);
       try {
         const response = await getAllRetrievedTweets();
-        setUsersData(response.data);
+        console.log("tweets data---------->",response.data);
+        setPosts(response.data);
         setIsLoading(false);
       } catch (error) {
         console.error('Failed to fetch data:', error);
@@ -71,19 +73,21 @@ const MostActiveUserInPost = () => {
               <Th>Post</Th>
               <Th>Likes</Th>
               <Th>Comments</Th>
-              <Th>Most Active User</Th>
+              <Th>Most Active Users</Th>
             </Tr>
           </Thead>
           <Tbody>
-            {posts.map((post) => (
+            {posts?.map((post) => (
               <Tr key={post.tweetId}>
                 <Td>{post.text}</Td>
                 <Td>{post.likes}</Td>
                 <Td>{post.replies}</Td>
                 <Td>
-                  <Link color="blue.500" onClick={() => handleViewProfile(post.mostActiveUser)}>
-                    {post.mostActiveUser.name}
-                  </Link>
+                  {post?.mostActiveUser?.map((user) => (
+                  <Link color="blue.500" onClick={() => handleViewProfile(user)}>
+                    {user?.name}
+                  </Link>))
+                  }
                 </Td>
               </Tr>
             ))}
