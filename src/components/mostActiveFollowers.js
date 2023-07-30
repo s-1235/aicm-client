@@ -23,6 +23,7 @@ const MostActiveUsers = () => {
   const [sortDirection, setSortDirection] = useState('asc');
   const [isLoading, setIsLoading] = useState(true); // initialize loading state
   const [usersData, setUsersData] = useState([]); // initialize state for users data
+  const color = useColorModeValue('white', 'gray.800'); // use the hook at the top level of your function
 
   useEffect(() => {
     const fetchMostActiveUsers = async () => {
@@ -95,7 +96,7 @@ const MostActiveUsers = () => {
             </Select>
           </Flex>
 
-          <Table variant="simple" bg={useColorModeValue('white', 'gray.800')} boxShadow="md" rounded="md">
+          <Table variant="simple" bg={color} boxShadow="md" rounded="md">
             <Thead>
               <Tr>
                 <Th cursor="pointer" onClick={() => sortByColumn('name')}>Name {sortColumn === 'name' && (sortDirection === 'asc' ? <ChevronUpIcon /> : <ChevronDownIcon />)}</Th>

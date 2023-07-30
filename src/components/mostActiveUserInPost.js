@@ -19,23 +19,25 @@ import {
   ModalBody,
   ModalFooter,
 } from '@chakra-ui/react';
+import { getAllRetrievedTweets } from './../utils/api';
 
-const PostTable = () => {
+const MostActiveUserInPost = () => {
   const [posts, setPosts] = useState([]);
   const [selectedUser, setSelectedUser] = useState(null);
 
   // Function to fetch data from the backend API
-  const fetchPosts = async () => {
-    try {
-      const response = await fetch('/api/twitter/savedTweets');
-      const data = await response.json();
-      setPosts(data);
-    } catch (error) {
-      console.error('Error fetching posts:', error);
-    }
-  };
-
   useEffect(() => {
+    const fetchPosts = async () => {
+      setIsLoading(true);
+      try {
+        const response = await getAllRetrievedTweets();
+        setUsersData(response.data);
+        setIsLoading(false);
+      } catch (error) {
+        console.error('Failed to fetch data:', error);
+        setIsLoading(false);
+      }
+    };
     fetchPosts();
   }, []);
 
@@ -90,7 +92,7 @@ const PostTable = () => {
         <Modal isOpen={selectedUser !== null} onClose={handleCloseModal}>
           <ModalOverlay />
           <ModalContent>
-            <ModalHeader>{selectedUser?.name}'s Profile</ModalHeader>
+            <ModalHeader>{selectedUser?.name}&apos;s Profile</ModalHeader>
             <ModalCloseButton />
             <ModalBody>
               <Box display="flex" alignItems="center">
@@ -112,4 +114,4 @@ const PostTable = () => {
   );
 };
 
-export default PostTable;
+export default MostActiveUserInPost;

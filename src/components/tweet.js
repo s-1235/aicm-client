@@ -1,6 +1,6 @@
 // components/TweetForm.js
 import { useState } from 'react';
-import { Box, Button, Flex, Input, Textarea } from '@chakra-ui/react';
+import { Box, Button, Flex, Input, Textarea, Image } from '@chakra-ui/react';
 import { useDropzone } from 'react-dropzone';
 
 const TweetForm = () => {
@@ -57,7 +57,7 @@ const TweetForm = () => {
       {uploadedImage && (
         <Box mt={4}>
           <p>Uploaded Image:</p>
-          <img src={URL.createObjectURL(uploadedImage)} alt="Uploaded" width="200" />
+          <Image src={URL.createObjectURL(uploadedImage)} alt="Uploaded" width="200" />
         </Box>
       )}
     </Box>
