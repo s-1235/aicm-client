@@ -24,6 +24,8 @@ import { getAllRetrievedTweets } from './../utils/api';
 const MostActiveUserInPost = () => {
   const [posts, setPosts] = useState([]);
   const [selectedUser, setSelectedUser] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
+
 
   // Function to fetch data from the backend API
   useEffect(() => {
