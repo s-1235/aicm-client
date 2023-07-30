@@ -1,0 +1,115 @@
+import { useEffect, useState } from 'react';
+import {
+  Box,
+  Text,
+  Table,
+  Thead,
+  Tbody,
+  Tr,
+  Th,
+  Td,
+  Avatar,
+  Link,
+  Button,
+  Modal,
+  ModalOverlay,
+  ModalContent,
+  ModalHeader,
+  ModalCloseButton,
+  ModalBody,
+  ModalFooter,
+} from '@chakra-ui/react';
+
+const PostTable = () => {
+  const [posts, setPosts] = useState([]);
+  const [selectedUser, setSelectedUser] = useState(null);
+
+  // Function to fetch data from the backend API
+  const fetchPosts = async () => {
+    try {
+      const response = await fetch('/api/twitter/savedTweets');
+      const data = await response.json();
+      setPosts(data);
+    } catch (error) {
+      console.error('Error fetching posts:', error);
+    }
+  };
+
+  useEffect(() => {
+    fetchPosts();
+  }, []);
+
+  const handleViewProfile = (user) => {
+    setSelectedUser(user);
+  };
+
+  const handleCloseModal = () => {
+    setSelectedUser(null);
+  };
+
+  return (
+    <Box p={4}>
+      <Box
+        backgroundColor="white"
+        border="2px solid #d1d1d1"
+        borderRadius="10px"
+        p={6}
+        boxShadow="0px 4px 8px rgba(0, 0, 0, 0.1)"
+        maxWidth="800px"
+        width="100%"
+      >
+        <Text fontSize="24px" fontWeight="bold" mb="20px" color="#0eb7f4">
+          Post Table
+        </Text>
+        <Table variant="simple" mt={4}>
+          <Thead>
+            <Tr>
+              <Th>Post</Th>
+              <Th>Likes</Th>
+              <Th>Comments</Th>
+              <Th>Most Active User</Th>
+            </Tr>
+          </Thead>
+          <Tbody>
+            {posts.map((post) => (
+              <Tr key={post.tweetId}>
+                <Td>{post.text}</Td>
+                <Td>{post.likes}</Td>
+                <Td>{post.replies}</Td>
+                <Td>
+                  <Link color="blue.500" onClick={() => handleViewProfile(post.mostActiveUser)}>
+                    {post.mostActiveUser.name}
+                  </Link>
+                </Td>
+              </Tr>
+            ))}
+          </Tbody>
+        </Table>
+
+        {/* Modal for viewing user profile/details */}
+        <Modal isOpen={selectedUser !== null} onClose={handleCloseModal}>
+          <ModalOverlay />
+          <ModalContent>
+            <ModalHeader>{selectedUser?.name}'s Profile</ModalHeader>
+            <ModalCloseButton />
+            <ModalBody>
+              <Box display="flex" alignItems="center">
+                <Avatar size="sm" src={selectedUser?.profile_image_url} />
+                <Text ml={2}>{selectedUser?.name}</Text>
+              </Box>
+              {/* Add other user details or profile information here */}
+              <Text mt={4}>Description: {selectedUser?.description}</Text>
+            </ModalBody>
+            <ModalFooter>
+              <Button colorScheme="blue" onClick={handleCloseModal}>
+                Close
+              </Button>
+            </ModalFooter>
+          </ModalContent>
+        </Modal>
+      </Box>
+    </Box>
+  );
+};
+
+export default PostTable;
