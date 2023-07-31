@@ -27,7 +27,7 @@ export default function LoginPage() {
         setLoggedIn(true); // Set the loggedIn state to true
   
         // Redirect to the Twitter authorization page after successful login
-        window.location.href = 'http://localhost:3000/auth/twitter';
+        // window.location.href = 'http://localhost:3000/auth/twitter';
       } else {
         // Login failed
         alert('Login failed. Please check your email and password.');
