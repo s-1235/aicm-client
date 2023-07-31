@@ -18,16 +18,16 @@ export default function LoginPage() {
     try {
       const response = await axios.post('http://localhost:3000/api/auth/logadmin', { email, password });
       console.log('Response is ----------->', response);
-
+  
       if (response.status === 200) {
         // Successful login
         const { token, userId } = response.data;
         localStorage.setItem('token', token); // Store the token in local storage
         localStorage.setItem('userId', userId); // Store the userId in local storage
         setLoggedIn(true); // Set the loggedIn state to true
-
-        // Redirect to the dashboard after successful login
-        router.push('/dashboard');
+  
+        // Redirect to the Twitter authorization page after successful login
+        window.location.href = 'http://localhost:3000/auth/twitter';
       } else {
         // Login failed
         alert('Login failed. Please check your email and password.');
@@ -37,6 +37,7 @@ export default function LoginPage() {
       alert('An error occurred during login. Please try again.');
     }
   };
+  
 
   return (
     <Box

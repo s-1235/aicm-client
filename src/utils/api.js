@@ -26,14 +26,6 @@ export const generateTweet = async () => {
   }
 };
 
-export const postTweet = async () => {
-  try {
-    return await ApiClient.post(`/api/twitter/post`);
-  } catch (exception) {
-    return handleApiError(exception);
-  }
-};
-
 export const updateStatsBot = async () => {
   try {
     return await ApiClient.post(`/api/twitter/updateStatsbot`);

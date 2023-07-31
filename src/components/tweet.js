@@ -1,12 +1,14 @@
-// components/TweetForm.js
 import { useState } from 'react';
-import { Box, Button, Flex, Input, Textarea, Image } from '@chakra-ui/react';
+import { Box, Button, Flex, Textarea, Image, useToast, useDisclosure } from '@chakra-ui/react';
 import { useDropzone } from 'react-dropzone';
+import axios from 'axios';
 
-const TweetForm = () => {
+const TweetForm = ({ onClose }) => {
   const [tweetText, setTweetText] = useState('');
   const [hasCalendar, setHasCalendar] = useState(false);
   const [uploadedImage, setUploadedImage] = useState(null);
+  const toast = useToast();
+  const token = localStorage.getItem('token');
 
   const handleTweetChange = (e) => {
     setTweetText(e.target.value);
@@ -16,15 +18,31 @@ const TweetForm = () => {
     setHasCalendar((prev) => !prev);
   };
 
-  const handleTweetSubmit = () => {
-    // Code to send the tweetText, hasCalendar, and uploadedImage to the backend
-    // Your backend should handle the tweet posting with or without a calendar option
-    console.log('Tweet Text:', tweetText);
-    console.log('Has Calendar:', hasCalendar);
-    console.log('Uploaded Image:', uploadedImage);
+  const handleTweetSubmit = async () => {
+    try {
+      let formData = new FormData();
+      formData.append('tweetContent', tweetText);
+      if (hasCalendar) {
+        formData.append('hasCalendar', hasCalendar);
+      }
+      if (uploadedImage) {
+        formData.append('imageData', uploadedImage);
+      }
+
+      const response = await postTweet(formData);
+      toast({
+        title: "Success",
+        description: response.data.message,
+        status: "success",
+        duration: 3000,
+        isClosable: true,
+      });
+      onClose(); // Close the modal
+    } catch (error) {
+      console.error('Error generating tweet:', error);
+    }
   };
 
-  // react-dropzone configuration
   const onDrop = (acceptedFiles) => {
     const file = acceptedFiles[0];
     setUploadedImage(file);
@@ -32,12 +50,26 @@ const TweetForm = () => {
 
   const { getRootProps, getInputProps } = useDropzone({ onDrop });
 
+  const postTweet = async (formData) => {
+    try {
+      return await axios.post(`http://localhost:3000/api/twitter/generate`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+          'Authorization': `Bearer ${token}`
+        },
+      });
+    } catch (exception) {
+      console.error('Failed to post tweet', exception);
+      throw exception;
+    }
+  };
+
   return (
     <Box>
       <Textarea
         placeholder="What's happening?"
-        rows={15} // Set the number of rows for the textarea
-        resize="vertical" // Set the resize behavior of the textarea (optional)
+        rows={15} 
+        resize="vertical"
         mb={4}
         value={tweetText}
         onChange={handleTweetChange}

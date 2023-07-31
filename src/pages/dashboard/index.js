@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Box,
   Button,
@@ -34,7 +34,12 @@ const Dashboard = () => {
   const handleCloseTweetModal = () => {
     setTweetModalOpen(false);
   };
-
+  useEffect(() => {
+    // If there's no token in local storage, the user is not logged in, redirect to login page
+    if (!localStorage.getItem('token')) {
+      router.push('/login');
+    }
+  }, [router]);
   const renderTabContent = () => {
     switch (activeTab) {
       case 'MostActiveFollowers':
@@ -128,7 +133,7 @@ const Dashboard = () => {
       <Modal isOpen={isTweetModalOpen} onClose={handleCloseTweetModal}>
         <ModalOverlay />
         <ModalContent>
-          <ModalHeader>Create a Tweet</ModalHeader>
+          <ModalHeader>Create a Tweet With AI</ModalHeader>
           <ModalCloseButton />
           <ModalBody>
             <TweetForm onClose={handleCloseTweetModal} />
