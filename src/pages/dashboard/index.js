@@ -22,8 +22,12 @@ import ActiveFollowersDetails from '@/components/activeFollowersDetails';
 import MostActiveUserInPost from '@/components/mostActiveUserInPost';
 import TweetForm from '@/components/tweet';
 import { FiUsers, FiUserCheck, FiUserPlus, FiEdit } from 'react-icons/fi';
+import { useRouter } from 'next/router';
+// import router from 'next/router';
 
 const Dashboard = () => {
+
+  const router=useRouter();
   const [activeTab, setActiveTab] = useState('MostActiveFollowers');
   const [isTweetModalOpen, setTweetModalOpen] = useState(false);
 

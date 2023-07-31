@@ -83,8 +83,8 @@ const MostActiveUserInPost = () => {
                 <Td>{post.likes}</Td>
                 <Td>{post.replies}</Td>
                 <Td>
-                  {post?.mostActiveUser?.map((user) => (
-                  <Link color="blue.500" onClick={() => handleViewProfile(user)}>
+                  {post?.mostActiveUser?.map((user,i) => (
+                  <Link key={i} color="blue.500" onClick={() => handleViewProfile(user)}>
                     {user?.name}
                   </Link>))
                   }
