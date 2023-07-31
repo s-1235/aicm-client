@@ -52,7 +52,7 @@ const TweetForm = ({ onClose }) => {
 
   const postTweet = async (formData) => {
     try {
-      return await axios.post(`http://localhost:3000/api/twitter/generate`, formData, {
+      return await axios.post(`https://aicm-server-production.up.railway.app/api/twitter/generate`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
           'Authorization': `Bearer ${token}`
