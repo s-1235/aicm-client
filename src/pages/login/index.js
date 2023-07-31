@@ -16,7 +16,7 @@ export default function LoginPage() {
 
   const handleLogin = async () => {
     try {
-      const response = await axios.post('http://localhost:3000/api/auth/logadmin', { email, password });
+      const response = await axios.post('https://aicm-server-production.up.railway.app/api/auth/logadmin', { email, password });
       console.log('Response is ----------->', response);
   
       if (response.status === 200) {
