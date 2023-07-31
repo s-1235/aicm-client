@@ -25,6 +25,7 @@ export default function LoginPage() {
         localStorage.setItem('token', token); // Store the token in local storage
         localStorage.setItem('userId', userId); // Store the userId in local storage
         setLoggedIn(true); // Set the loggedIn state to true
+        router.push('/dashboard');
   
         // Redirect to the Twitter authorization page after successful login
         // window.location.href = 'http://localhost:3000/auth/twitter';
