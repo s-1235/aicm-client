@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Box,
   Text,
@@ -23,125 +23,79 @@ import {
   ModalFooter,
 } from '@chakra-ui/react';
 import { AiFillLike, AiFillComment, AiFillRetweet, AiOutlineSend } from 'react-icons/ai';
+import { getAllRetrievedTweets } from './../utils/api';
 
 const ActiveFollowersDetails = () => {
   const [selectedOption, setSelectedOption] = useState('');
   const [message, setMessage] = useState('');
   const [mostActiveFollowers, setMostActiveFollowers] = useState([]);
   const [selectedFollower, setSelectedFollower] = useState(null);
+  const [posts, setPosts] = useState([]);
+  const [isOpen, setIsOpen] = useState(false);
 
-  // Dummy data for demonstration
-  const dummyFollowers = [
-    {
-      id: 1,
-      name: 'John Doe',
-      picture: 'https://via.placeholder.com/50',
-      likesCount: 500,
-      commentsCount: 300,
-      retweetsCount: 200,
-    },
-    {
-      id: 2,
-      name: 'Jane Smith',
-      picture: 'https://via.placeholder.com/50',
-      likesCount: 400,
-      commentsCount: 350,
-      retweetsCount: 150,
-    },
-    // Add more dummy data...
-  ];
+  const onClose = () => setIsOpen(false);
+  const openModal = (follower) => {
+    setSelectedFollower(follower);
+    setIsOpen(true);
+  }
 
-  // Dummy data for interaction details
-  const dummyInteractionDetails = {
-    posts: [
-      {
-        id: 1,
-        content: 'This is a post by John Doe',
-        likes: 100,
-        comments: 50,
-        retweets: 20,
-      },
-      {
-        id: 2,
-        content: 'Another post by John Doe',
-        likes: 120,
-        comments: 70,
-        retweets: 30,
-      },
-      // Add more posts...
-    ],
-    likedPosts: [
-      {
-        id: 1,
-        content: 'John Doe liked this post',
-        likes: 0,
-        comments: 0,
-        retweets: 0,
-      },
-      {
-        id: 2,
-        content: 'John Doe liked another post',
-        likes: 0,
-        comments: 0,
-        retweets: 0,
-      },
-      // Add more liked posts...
-    ],
-    commentedPosts: [
-      {
-        id: 1,
-        content: 'John Doe commented on this post',
-        likes: 0,
-        comments: 0,
-        retweets: 0,
-      },
-      {
-        id: 2,
-        content: 'John Doe commented on another post',
-        likes: 0,
-        comments: 0,
-        retweets: 0,
-      },
-      // Add more commented posts...
-    ],
+  useEffect(() => {
+    const fetchPosts = async () => {
+      try {
+        const response = await getAllRetrievedTweets();
+        setPosts(response.data);
+      } catch (error) {
+        console.error('Failed to fetch data:', error);
+      }
+    };
+    fetchPosts();
+  }, []);
+
+  const computeUserScores = (data) => {
+    const userScores = {};
+
+    data.forEach(post => {
+      if (post.mostActiveUser) {
+        post.mostActiveUser.forEach(user => {
+          if (!userScores[user.userId]) {
+            userScores[user.userId] = {
+              name: user.name,
+              username: user.username,
+              profile_image_url: user.profile_image_url,
+              likes: 0,
+              retweets: 0
+            };
+          }
+          if (user.score === 1 || user.score === 3) {
+            userScores[user.userId].likes += 1;
+          }
+          if (user.score === 2 || user.score === 3) {
+            userScores[user.userId].retweets += 1;
+          }
+        });
+      }
+    });
+
+    return Object.values(userScores);
   };
 
   const handleOptionChange = (event) => {
     setSelectedOption(event.target.value);
-  };
+    const scores = computeUserScores(posts);
 
-  const handleSendMessage = () => {
-    // Implement the logic to send the message to active followers based on the selected option and message
-    console.log('Sending message to active followers:', selectedOption, message);
-  };
-
-  const handleShowMostActiveFollowers = () => {
-    // Sort followers based on the selected option
     let sortedFollowers = [];
-    switch (selectedOption) {
+    switch (event.target.value) {
       case 'like_most':
-        sortedFollowers = dummyFollowers.sort((a, b) => b.likesCount - a.likesCount);
-        break;
-      case 'comment_most':
-        sortedFollowers = dummyFollowers.sort((a, b) => b.commentsCount - a.commentsCount);
+        sortedFollowers = scores.sort((a, b) => b.likes - a.likes);
         break;
       case 'retweet_most':
-        sortedFollowers = dummyFollowers.sort((a, b) => b.retweetsCount - a.retweetsCount);
+        sortedFollowers = scores.sort((a, b) => b.retweets - a.retweets);
         break;
       default:
-        sortedFollowers = dummyFollowers;
+        sortedFollowers = scores;
     }
 
-    // Set the most active followers to state
     setMostActiveFollowers(sortedFollowers);
-  };
-
-  const handleShowInteractionDetails = (follower) => {
-    setSelectedFollower(follower);
-  };
-
-  const handleCloseModal = () => {
-    setSelectedFollower(null);
   };
 
   return (
@@ -162,49 +116,38 @@ const ActiveFollowersDetails = () => {
           <FormLabel>Choose active followers based on:</FormLabel>
           <Select value={selectedOption} onChange={handleOptionChange}>
             <option value="like_most">Like Most</option>
-            <option value="comment_most">Comment Most</option>
             <option value="retweet_most">Retweet Most</option>
           </Select>
         </FormControl>
-        <Button colorScheme="blue" onClick={handleShowMostActiveFollowers}>
-          Show Most Active Followers
-        </Button>
 
         {mostActiveFollowers.length > 0 && (
           <Table variant="simple" mt={4}>
             <Thead>
               <Tr>
                 <Th>Name</Th>
+                <Th>Username</Th>
                 <Th>Profile Picture</Th>
                 <Th>Likes</Th>
-                <Th>Comments</Th>
                 <Th>Retweets</Th>
-                <Th>Send Message</Th>
-                <Th>Interaction Details</Th>
+                <Th>Action</Th>
               </Tr>
             </Thead>
             <Tbody>
-              {mostActiveFollowers.map((follower) => (
-                <Tr key={follower.id}>
+              {mostActiveFollowers.map((follower, index) => (
+                <Tr key={index}>
                   <Td>{follower.name}</Td>
+                  <Td>{follower.username}</Td>
                   <Td>
-                    <Avatar size="sm" src={follower.picture} />
+                    <Avatar size="sm" src={follower.profile_image_url} />
                   </Td>
-                  <Td>{follower.likesCount}</Td>
-                  <Td>{follower.commentsCount}</Td>
-                  <Td>{follower.retweetsCount}</Td>
+                  <Td>{follower.likes}</Td>
+                  <Td>{follower.retweets}</Td>
                   <Td>
                     <IconButton
+                      onClick={() => openModal(follower)}
                       icon={<AiOutlineSend />}
-                      colorScheme="blue"
-                      onClick={() => handleSendMessage(follower)}
-                    />
-                  </Td>
-                  <Td>
-                    <IconButton
-                      icon={<AiFillLike />}
-                      colorScheme="blue"
-                      onClick={() => handleShowInteractionDetails(follower)}
+                      aria-label="Send message"
+                      colorScheme="twitter"
                     />
                   </Td>
                 </Tr>
@@ -213,88 +156,29 @@ const ActiveFollowersDetails = () => {
           </Table>
         )}
 
-        {/* Modal for showing interaction details */}
-        {selectedFollower !== null && (
-          <Modal isOpen={selectedFollower !== null} onClose={handleCloseModal}>
+        {selectedFollower && (
+          <Modal isOpen={isOpen} onClose={onClose}>
             <ModalOverlay />
-            <ModalContent maxWidth="1000px">
-              <ModalHeader>Interaction Details for {selectedFollower?.name}</ModalHeader>
+            <ModalContent>
+              <ModalHeader>Message {selectedFollower.name}</ModalHeader>
               <ModalCloseButton />
-              <ModalBody width="800px" maxHeight="70vh" overflowY="auto">
-                <Box>
-                  <Text fontWeight="bold">Posts:</Text>
-                  <Table variant="simple">
-                    <Thead>
-                      <Tr>
-                        <Th>Content</Th>
-                        <Th>Likes</Th>
-                        <Th>Comments</Th>
-                        <Th>Retweets</Th>
-                      </Tr>
-                    </Thead>
-                    <Tbody>
-                      {dummyInteractionDetails.posts.map((post) => (
-                        <Tr key={post.id}>
-                          <Td>{post.content}</Td>
-                          <Td>{post.likes}</Td>
-                          <Td>{post.comments}</Td>
-                          <Td>{post.retweets}</Td>
-                        </Tr>
-                      ))}
-                    </Tbody>
-                  </Table>
-                </Box>
-                <Box mt={4}>
-                  <Text fontWeight="bold">Liked Posts:</Text>
-                  <Table variant="simple">
-                    <Thead>
-                      <Tr>
-                        <Th>Content</Th>
-                        <Th>Likes</Th>
-                        <Th>Comments</Th>
-                        <Th>Retweets</Th>
-                      </Tr>
-                    </Thead>
-                    <Tbody>
-                      {dummyInteractionDetails.likedPosts.map((post) => (
-                        <Tr key={post.id}>
-                          <Td>{post.content}</Td>
-                          <Td>{post.likes}</Td>
-                          <Td>{post.comments}</Td>
-                          <Td>{post.retweets}</Td>
-                        </Tr>
-                      ))}
-                    </Tbody>
-                  </Table>
-                </Box>
-                <Box mt={4}>
-                  <Text fontWeight="bold">Commented Posts:</Text>
-                  <Table variant="simple">
-                    <Thead>
-                      <Tr>
-                        <Th>Content</Th>
-                        <Th>Likes</Th>
-                        <Th>Comments</Th>
-                        <Th>Retweets</Th>
-                      </Tr>
-                    </Thead>
-                    <Tbody>
-                      {dummyInteractionDetails.commentedPosts.map((post) => (
-                        <Tr key={post.id}>
-                          <Td>{post.content}</Td>
-                          <Td>{post.likes}</Td>
-                          <Td>{post.comments}</Td>
-                          <Td>{post.retweets}</Td>
-                        </Tr>
-                      ))}
-                    </Tbody>
-                  </Table>
-                </Box>
+              <ModalBody>
+                <FormControl>
+                  <FormLabel>Enter your message</FormLabel>
+                  <textarea
+                    value={message}
+                    onChange={(e) => setMessage(e.target.value)}
+                    placeholder="Type your message here..."
+                    style={{ width: '100%', padding: '10px', minHeight: '150px' }}
+                  />
+                </FormControl>
               </ModalBody>
+
               <ModalFooter>
-                <Button colorScheme="blue" onClick={handleCloseModal}>
-                  Close
+                <Button colorScheme="twitter" mr={3} onClick={onClose}>
+                  Send
                 </Button>
+                <Button variant="ghost" onClick={onClose}>Cancel</Button>
               </ModalFooter>
             </ModalContent>
           </Modal>

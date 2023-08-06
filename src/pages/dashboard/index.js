@@ -78,6 +78,20 @@ const Dashboard = () => {
     setTweetModalOpen(false);
   };
 
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('userId');
+    toast({
+      title: "Logged Out",
+      description: "You are logged out successfully.",
+      status: "success",
+      duration: 2000,
+      isClosable: true,
+      position: "bottom"
+    });
+    router.push('/login');
+  };
+
   useEffect(() => {
     if (!localStorage.getItem('token')) {
       router.push('/login');
@@ -166,7 +180,7 @@ const Dashboard = () => {
               <FiUsers size={20} style={{ marginRight: '8px' }} />
               Account
             </Button>
-            <Button variant="outline" colorScheme="red" ml={4}>
+            <Button variant="outline" colorScheme="red" ml={4} onClick={handleLogout}>
               <FiUsers size={20} style={{ marginRight: '8px' }} />
               Logout
             </Button>
