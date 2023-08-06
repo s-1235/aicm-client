@@ -18,6 +18,7 @@ import {
   ModalCloseButton,
   ModalBody,
   ModalFooter,
+  Input,
 } from '@chakra-ui/react';
 import { getAllRetrievedTweets } from './../utils/api';
 
@@ -25,10 +26,9 @@ const MostActiveUserInPost = () => {
   const [posts, setPosts] = useState([]);
   const [selectedUser, setSelectedUser] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [selectedDate, setSelectedDate] = useState("");
 
-
-
-  // Function to fetch data from the backend API
   useEffect(() => {
     const fetchPosts = async () => {
       setIsLoading(true);
@@ -45,12 +45,32 @@ const MostActiveUserInPost = () => {
     fetchPosts();
   }, []);
 
+  const filteredPosts = posts?.filter(post => {
+    if (!selectedDate) return true;
+    const postDate = new Date(post.createdAt).toISOString().split("T")[0];
+    return postDate === selectedDate;
+  });
+
+  const displayedPosts = filteredPosts?.slice(currentIndex, currentIndex + 5);
+
   const handleViewProfile = (user) => {
     setSelectedUser(user);
   };
 
   const handleCloseModal = () => {
     setSelectedUser(null);
+  };
+
+  const handleNext = () => {
+    if (currentIndex + 5 < filteredPosts.length) {
+      setCurrentIndex(currentIndex + 5);
+    }
+  };
+
+  const handlePrev = () => {
+    if (currentIndex > 0) {
+      setCurrentIndex(currentIndex - 5);
+    }
   };
 
   return (
@@ -64,9 +84,16 @@ const MostActiveUserInPost = () => {
         maxWidth="800px"
         width="100%"
       >
-        <Text fontSize="24px" fontWeight="bold" mb="20px" color="#0eb7f4">
-          Post Table
-        </Text>
+        <Box display="flex" justifyContent="space-between" alignItems="center">
+          <Text fontSize="24px" fontWeight="bold" color="#0eb7f4">Post Table</Text>
+          <Input
+            type="date"
+            onChange={(e) => setSelectedDate(e.target.value)}
+            value={selectedDate}
+            max={new Date().toISOString().split("T")[0]}
+            width="200px"
+          />
+        </Box>
         <Table variant="simple" mt={4}>
           <Thead>
             <Tr>
@@ -77,7 +104,7 @@ const MostActiveUserInPost = () => {
             </Tr>
           </Thead>
           <Tbody>
-            {posts?.map((post) => (
+            {displayedPosts?.map((post) => (
               <Tr key={post.tweetId}>
                 <Td>{post.text}</Td>
                 <Td>{post.likes}</Td>
@@ -93,6 +120,10 @@ const MostActiveUserInPost = () => {
             ))}
           </Tbody>
         </Table>
+        <Box display="flex" justifyContent="space-between" alignItems="center" mt={4}>
+          <Button onClick={handlePrev} isDisabled={currentIndex === 0}> {currentIndex + 1} ← Previous </Button>
+          <Button onClick={handleNext} isDisabled={currentIndex + 5 >= filteredPosts?.length}> Next → {currentIndex + Math.min(5, displayedPosts?.length)} </Button>
+        </Box>
 
         {/* Modal for viewing user profile/details */}
         <Modal isOpen={selectedUser !== null} onClose={handleCloseModal}>
@@ -105,13 +136,10 @@ const MostActiveUserInPost = () => {
                 <Avatar size="sm" src={selectedUser?.profile_image_url} />
                 <Text ml={2}>{selectedUser?.name}</Text>
               </Box>
-              {/* Add other user details or profile information here */}
               <Text mt={4}>Description: {selectedUser?.description}</Text>
             </ModalBody>
             <ModalFooter>
-              <Button colorScheme="blue" onClick={handleCloseModal}>
-                Close
-              </Button>
+              <Button colorScheme="blue" onClick={handleCloseModal}>Close</Button>
             </ModalFooter>
           </ModalContent>
         </Modal>

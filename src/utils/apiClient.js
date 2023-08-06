@@ -3,7 +3,7 @@
 import axios from 'axios';
 
 const apiClient = axios.create({
-  baseURL: 'https://aicm-server-production.up.railway.app/', // your base URL here
+  baseURL: 'http://localhost:3000/', // your base URL here
   headers: {
     'Content-Type': 'application/json',
     // any other headers can go here

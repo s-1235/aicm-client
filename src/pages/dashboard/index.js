@@ -16,20 +16,59 @@ import {
   ModalHeader,
   ModalBody,
   ModalCloseButton,
+  useToast
 } from '@chakra-ui/react';
 import MostActiveFollowers from '@/components/mostActiveFollowers';
 import ActiveFollowersDetails from '@/components/activeFollowersDetails';
 import MostActiveUserInPost from '@/components/mostActiveUserInPost';
 import TweetForm from '@/components/tweet';
 import { FiUsers, FiUserCheck, FiUserPlus, FiEdit } from 'react-icons/fi';
+import { RepeatIcon } from '@chakra-ui/icons';
 import { useRouter } from 'next/router';
-// import router from 'next/router';
+import { getLast100Tweets } from '@/utils/api';
 
 const Dashboard = () => {
-
-  const router=useRouter();
+  const router = useRouter();
+  const toast = useToast();
   const [activeTab, setActiveTab] = useState('MostActiveFollowers');
   const [isTweetModalOpen, setTweetModalOpen] = useState(false);
+
+  const handleFetchNewData = async () => {
+    try {
+      const response = await getLast100Tweets();
+      console.log("Reponse is ------------>",response);
+      if (response.status === 200) {
+        toast({
+          title: "Success",
+          description: "New data fetched successfully!",
+          status: "success",
+          duration: 2000,
+          isClosable: true,
+          position: "bottom"
+        });
+        // Re-render the page
+        router.push(router.asPath);
+      } else {
+        toast({
+          title: "Error",
+          description: "There was an error fetching the data.",
+          status: "error",
+          duration: 3000,
+          isClosable: true,
+          position: "bottom"
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "There was an error fetching the data.",
+        status: "error",
+        duration: 3000,
+        isClosable: true,
+        position: "bottom"
+      });
+    }
+  };
 
   const handleOpenTweetModal = () => {
     setTweetModalOpen(true);
@@ -38,12 +77,13 @@ const Dashboard = () => {
   const handleCloseTweetModal = () => {
     setTweetModalOpen(false);
   };
+
   useEffect(() => {
-    // If there's no token in local storage, the user is not logged in, redirect to login page
     if (!localStorage.getItem('token')) {
       router.push('/login');
     }
   }, [router]);
+
   const renderTabContent = () => {
     switch (activeTab) {
       case 'MostActiveFollowers':
@@ -67,7 +107,6 @@ const Dashboard = () => {
     <Box display="flex" height="100vh">
       {/* Sidebar */}
       <GridItem bg="gray.100" p={4} borderRadius="md" position="fixed" height="100%" zIndex={10}>
-        {/* Logo and Text */}
         <Box display="flex" alignItems="center" justifyContent="center" mb={4}>
           <Box as="span" fontSize="xl" fontWeight="bold" color="blue.500">
             AICM
@@ -111,11 +150,14 @@ const Dashboard = () => {
         </Tabs>
       </GridItem>
 
-      {/* Right Side - Component Details */}
+      {/* Right Side */}
       <GridItem ml="140px" mt="50px" width="calc(100% - 250px)">
         <Box p={4} borderRadius="md" ml="250px" height="100vh" overflowY="auto">
           <Box display="flex" justifyContent="flex-end" mb="8">
-            {/* Tweet button with icon */}
+            <Button variant="outline" mr="4" colorScheme="blue" onClick={handleFetchNewData}>
+              <RepeatIcon size={20} style={{ marginRight: '8px' }} />
+              Fetch New Data
+            </Button>
             <Button variant="outline" mr="4" colorScheme="blue" onClick={handleOpenTweetModal}>
               <FiEdit size={20} style={{ marginRight: '8px' }} />
               Tweet
